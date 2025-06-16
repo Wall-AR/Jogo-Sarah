@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resgate do Deus Esquecido</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        
+        <!-- Tela Inicial -->
+        <div id="tela-inicial" class="screen active">
+            <div class="background-layer">
+                <img src="assets/imagens/tela_inicio/tela_inicio_fundo.png" alt="Fundo" class="background-image">
+            </div>
+            
+            <div class="title-layer">
+                <img src="assets/imagens/tela_inicio/tela_inicio_titulo.png" alt="Resgate do Deus Esquecido" class="game-title">
+            </div>
+            
+            <div class="characters-layer">
+                <img src="assets/imagens/tela_inicio/tela_inicio_sarah_flutuando.png" alt="Sarah" class="character sarah-floating" id="sarah-floating">
+                <div class="salem-container character salem-floating" id="salem-container">
+                    <img src="assets/imagens/tela_inicio/tela_inicio_salem_flutuando.png" alt="Salem" class="salem-base">
+                    <img src="assets/imagens/tela_inicio/tela_inicio_salem_piscando_1.png" alt="Salem Piscando" class="salem-blinking salem-blink-1">
+                    <img src="assets/imagens/tela_inicio/tela_inicio_salem_piscando_2.png" alt="Salem Piscando 2" class="salem-blinking salem-blink-2">
+                </div>
+            </div>
+            
+            <div class="ui-layer">
+                <button id="btn-comecar" class="btn-comecar">
+                    <img src="assets/ui/ui_botao_comecar.png" alt="Começar" class="btn-image">
+                </button>
+            </div>
+        </div>
+
+        <!-- Fase 1 - Diálogo -->
+        <div id="fase1" class="screen">
+            <div class="background-layer">
+                <img src="assets/imagens/fase1/fase1_cena_sarah_salem.png" alt="Sarah e Salem" class="background-image">
+            </div>
+            
+            <div class="subtitle-container">
+                <div id="dialogue-text" class="subtitle-text"></div>
+                <button id="btn-proximo" class="btn-proximo hidden">Próximo</button>
+            </div>
+        </div>
+
+        <!-- Fase 2 - Cadê o Wallace? -->
+        <div id="fase2" class="screen">
+            <div class="background-layer">
+                <img src="assets/imagens/fase2/fase2_fundo_ghibli.png" alt="Fundo Ghibli" class="background-image">
+            </div>
+            
+            <div class="wallace-hunt-container">
+                <div class="wallace-spots">
+                    <img src="assets/imagens/fase2/fase2_wallace_escondido_1.png" alt="Wallace 1" class="wallace-hidden" data-wallace="1">
+                    <img src="assets/imagens/fase2/fase2_wallace_escondido_2.png" alt="Wallace 2" class="wallace-hidden" data-wallace="2">
+                    <img src="assets/imagens/fase2/fase2_wallace_escondido_3.png" alt="Wallace 3" class="wallace-hidden" data-wallace="3">
+                    <img src="assets/imagens/fase2/fase2_wallace_escondido_4.png" alt="Wallace 4" class="wallace-hidden" data-wallace="4">
+                    <img src="assets/imagens/fase2/fase2_wallace_escondido_5.png" alt="Wallace 5" class="wallace-hidden" data-wallace="5">
+                </div>
+                <div class="progress-indicator">
+                    <span id="wallace-found">0</span> / 5 Wallace encontrados
+                </div>
+            </div>
+        </div>
+
+              <!-- Fase 3 - Ritual da Canábis -->
+        <div id="fase3" class="screen">
+            <div class="background-layer">
+                <img src="assets/imagens/fase3/fase3_fundo_vortex_cosmico.png" alt="Vórtice Cósmico" class="background-image">
+            </div>
+            
+            <!-- Nova HUD no lado esquerdo superior -->
+            <div class="game-hud">
+                <div class="hud-title">RITUAL CÓSMICO</div>
+                
+                <div class="hud-item">
+                    <span class="hud-label">Nível:</span>
+                    <span class="hud-value" id="current-level">3</span>
+                </div>
+                
+                <div class="hud-item">
+                    <span class="hud-label">Pontos:</span>
+                    <span class="hud-value" id="score">0</span>
+                </div>
+                
+                <div class="hud-item">
+                    <span class="hud-label">Vidas:</span>
+                    <div class="lives-display" id="lives-display">
+                        <div class="life-heart"></div>
+                        <div class="life-heart"></div>
+                        <div class="life-heart"></div>
+                    </div>
+                </div>
+                
+                <div class="hud-item">
+                    <span class="hud-label">Progresso:</span>
+                    <span class="hud-value" id="progress-text">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div class="game-area">
+                <div class="sarah-container">
+                    <img src="assets/imagens/fase3/fase3_sarah_idle.png" alt="Sarah" id="sarah-player" class="sarah-player">
+                </div>
+                
+                <div class="items-container" id="items-container">
+                    <!-- Itens serão gerados dinamicamente -->
+                </div>
+            </div>
+        </div>v>
+
+        <!-- Fase 4 - Quiz Cósmico -->
+        <div id="fase4" class="screen">
+            <div class="background-layer">
+                <img src="assets/imagens/fase4/fase4_fundo_quiz.png" alt="Fundo Quiz" class="background-image">
+            </div>
+            
+            <div class="quiz-container">
+                <div class="question-container">
+                    <h2 id="question-text" class="question-text"></h2>
+                    <div class="answers-container" id="answers-container">
+                        <!-- Respostas serão geradas dinamicamente -->
+                    </div>
+                </div>
+                <div class="quiz-progress">
+                    Pergunta <span id="current-question">1</span> de <span id="total-questions">5</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fase Final - O Baú -->
+        <div id="fase-final" class="screen">
+            <div class="background-layer">
+                <img src="assets/imagens/fase_final/fase_final_fundo_altar.png" alt="Altar" class="background-image">
+            </div>
+            
+            <div class="treasure-container">
+                <img src="assets/imagens/fase_final/fase_final_bau_fechado.png" alt="Baú Fechado" id="bau-fechado" class="treasure-chest">
+                <img src="assets/imagens/fase_final/fase_final_bau_aberto.png" alt="Baú Aberto" id="bau-aberto" class="treasure-chest hidden">
+                
+                <div class="treasure-contents hidden" id="treasure-contents">
+                    <img src="assets/imagens/fase_final/fase_final_chocolates.png" alt="Chocolates" class="treasure-item">
+                    <img src="assets/imagens/fase_final/fase_final_camisola_sexy.png" alt="Camisola" class="treasure-item">
+                </div>
+                
+                <div class="memories-slideshow hidden" id="memories-slideshow">
+                    <img src="assets/imagens/fase_final/fase_final_imagem_casal_1.png" alt="Memória 1" class="memory-photo active">
+                    <img src="assets/imagens/fase_final/fase_final_imagem_casal_2.png" alt="Memória 2" class="memory-photo">
+                    <img src="assets/imagens/fase_final/fase_final_imagem_casal_3.png" alt="Memória 3" class="memory-photo">
+                </div>
+                
+                <div class="hearts-animation hidden" id="hearts-animation">
+                    <img src="assets/imagens/fase_final/fase_final_coracao_pixel.png" alt="Coração" class="floating-heart">
+                    <img src="assets/imagens/fase_final/fase_final_coracao_pixel.png" alt="Coração" class="floating-heart">
+                    <img src="assets/imagens/fase_final/fase_final_coracao_pixel.png" alt="Coração" class="floating-heart">
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Créditos -->
+        <div id="creditos" class="screen">
+            <div class="credits-container">
+                <h1>Créditos</h1>
+                <div class="credits-content">
+                    <p>Um jogo feito com amor para celebrar nossa conexão</p>
+                    <p>Desenvolvido especialmente para Sarah e Wallace</p>
+                    <p>Arte: Pixel Art Romântico Psicodélico</p>
+                    <p>Música: Trilha Sonora Emocional</p>
+                    <p>Obrigado por jogar!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles de Áudio -->
+        <div class="audio-controls">
+            <button id="mute-toggle" class="mute-btn">🔊</button>
+            <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="70">
+        </div>
+
+        <!-- Loading Screen -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <h2>Carregando...</h2>
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loading-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="background-music" loop>
+        <source src="assets/musica/music_intro_ambiente.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="sfx-player">
+        <source src="" type="audio/mpeg">
+    </audio>
+
+    <audio id="voice-player">
+        <source src="" type="audio/mpeg">
+    </audio>
+
+    <script src="js/game.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/phases.js"></script>
+    <script src="js/dialogue.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>
+
