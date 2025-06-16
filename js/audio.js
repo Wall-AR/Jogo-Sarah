@@ -10,7 +10,7 @@ class AudioManager {
         this.voiceVolume = 0.9;
         
         this.musicPlayer = document.getElementById('background-music');
-        this.sfxPlayer = document.getElementById('sfx-player');
+        // this.sfxPlayer = document.getElementById('sfx-player'); // HTML element not used for SFX playback
         this.voicePlayer = document.getElementById('voice-player');
         
         this.init();
@@ -22,9 +22,9 @@ class AudioManager {
             this.musicPlayer.volume = this.musicVolume * this.volume;
         }
         
-        if (this.sfxPlayer) {
-            this.sfxPlayer.volume = this.sfxVolume * this.volume;
-        }
+        // if (this.sfxPlayer) { // HTML element not used for SFX playback
+        //     this.sfxPlayer.volume = this.sfxVolume * this.volume;
+        // }
         
         if (this.voicePlayer) {
             this.voicePlayer.volume = this.voiceVolume * this.volume;
@@ -46,9 +46,9 @@ class AudioManager {
             this.musicPlayer.addEventListener('error', () => handleAudioError(this.musicPlayer, 'música de fundo'));
         }
         
-        if (this.sfxPlayer) {
-            this.sfxPlayer.addEventListener('error', () => handleAudioError(this.sfxPlayer, 'efeito sonoro'));
-        }
+        // if (this.sfxPlayer) { // HTML element not used for SFX playback
+        //     this.sfxPlayer.addEventListener('error', () => handleAudioError(this.sfxPlayer, 'efeito sonoro'));
+        // }
         
         if (this.voicePlayer) {
             this.voicePlayer.addEventListener('error', () => handleAudioError(this.voicePlayer, 'voz'));
@@ -105,30 +105,40 @@ class AudioManager {
     }
     
     playSFX(path, volume = 1.0) {
-        if (this.isMuted || !this.sfxPlayer) return;
-        
+        if (this.isMuted) return;
+
         try {
-            // Criar novo elemento de áudio para permitir múltiplos SFX simultâneos
-            const sfx = new Audio(path);
+            let sfx;
+            const preloadedAsset = this.audioAssets.get(path);
+
+            if (preloadedAsset) {
+                sfx = preloadedAsset.cloneNode(); // Clone the preloaded Audio object
+            } else {
+                // Fallback if not found in preloaded assets (should not happen if preloading is comprehensive)
+                console.warn(`SFX not found in preloaded assets: ${path}. Playing directly.`);
+                sfx = new Audio(path);
+            }
+
             sfx.volume = (this.sfxVolume * this.volume * volume);
             
             const playPromise = sfx.play();
             
             if (playPromise !== undefined) {
                 playPromise.then(() => {
-                    console.log(`SFX reproduzido: ${path}`);
+                    // console.log(`SFX reproduzido: ${path}`);
                 }).catch(error => {
-                    console.warn(`Erro ao reproduzir SFX: ${error}`);
+                    console.warn(`Erro ao reproduzir SFX: ${path} - ${error}`);
                 });
             }
             
-            // Limpar referência após reprodução
+            // Cloned Audio objects are not in the DOM, so sfx.remove() is not applicable.
+            // They will be garbage collected when no longer referenced after 'ended'.
             sfx.addEventListener('ended', () => {
-                sfx.remove();
+                // Optional: sfx = null; or other cleanup if managing a pool.
             });
             
         } catch (error) {
-            console.warn(`Erro ao carregar SFX: ${error}`);
+            console.warn(`Erro ao carregar SFX: ${path} - ${error}`);
         }
     }
     
@@ -216,9 +226,9 @@ class AudioManager {
             this.musicPlayer.volume = this.musicVolume * this.volume;
         }
         
-        if (this.sfxPlayer) {
-            this.sfxPlayer.volume = this.sfxVolume * this.volume;
-        }
+        // if (this.sfxPlayer) { // HTML element not used for SFX playback
+        //     this.sfxPlayer.volume = this.sfxVolume * this.volume;
+        // }
         
         if (this.voicePlayer) {
             this.voicePlayer.volume = this.voiceVolume * this.volume;
@@ -251,12 +261,12 @@ class AudioManager {
         if (this.isMuted) {
             // Mutar todos os áudios
             if (this.musicPlayer) this.musicPlayer.volume = 0;
-            if (this.sfxPlayer) this.sfxPlayer.volume = 0;
+            // if (this.sfxPlayer) this.sfxPlayer.volume = 0; // HTML element not used for SFX playback
             if (this.voicePlayer) this.voicePlayer.volume = 0;
         } else {
             // Restaurar volumes
             if (this.musicPlayer) this.musicPlayer.volume = this.musicVolume * this.volume;
-            if (this.sfxPlayer) this.sfxPlayer.volume = this.sfxVolume * this.volume;
+            // if (this.sfxPlayer) this.sfxPlayer.volume = this.sfxVolume * this.volume; // HTML element not used for SFX playback
             if (this.voicePlayer) this.voicePlayer.volume = this.voiceVolume * this.volume;
         }
         

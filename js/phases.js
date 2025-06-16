@@ -85,26 +85,42 @@ class PhaseManager {
         this.currentPhaseData = {
             wallaceFound: 0,
             totalWallace: config.requiredFinds,
-            foundPositions: new Set()
+            foundPositions: new Set(),
+            wallaceElements: [] // To store elements for cleanup
         };
         
         this.setupWallacePositions();
         this.updateWallaceProgress();
+
+        // Mostrar diálogo de introdução para Fase 2
+        if (this.game.dialogueManager) {
+            this.game.dialogueManager.showTransitionDialogue('fase2_intro', () => {
+                // Gameplay for Fase 2 can start immediately after dialogue.
+                // No specific gameActive flag needed for this phase's core mechanic.
+                console.log("Fase 2 intro dialogue complete. Gameplay enabled.");
+            });
+        }
     }
     
     setupWallacePositions() {
         const wallaceElements = document.querySelectorAll('.wallace-hidden');
         const config = this.phaseConfigs.fase2;
         
+        // Clear previous listeners if any (e.g. if phase is restarted)
+        this.currentPhaseData.wallaceElements.forEach(entry => {
+            entry.element.removeEventListener('click', entry.handler);
+        });
+        this.currentPhaseData.wallaceElements = [];
+
         wallaceElements.forEach((wallace, index) => {
             if (config.wallacePositions[index]) {
                 const pos = config.wallacePositions[index];
                 wallace.style.left = `${pos.x}%`;
                 wallace.style.top = `${pos.y}%`;
                 
-                wallace.addEventListener('click', (e) => {
-                    this.handleWallaceClick(wallace, pos.id);
-                });
+                const handler = (e) => this.handleWallaceClick(wallace, pos.id);
+                wallace.addEventListener('click', handler);
+                this.currentPhaseData.wallaceElements.push({ element: wallace, handler: handler });
             }
         });
     }
@@ -116,7 +132,10 @@ class PhaseManager {
         this.currentPhaseData.wallaceFound++;
         
         // Efeito visual de descoberta
-        this.createWallaceFoundEffect(wallaceElement);
+        if (this.game.animationManager) {
+            this.game.animationManager.animateWallaceFound(wallaceElement);
+        }
+        // this.createWallaceFoundEffect(wallaceElement); // Removed local version
         
         // Som de descoberta
         if (this.game.audioManager) {
@@ -137,42 +156,42 @@ class PhaseManager {
         }
     }
     
-    createWallaceFoundEffect(wallaceElement) {
-        // Flash de descoberta
-        const flash = document.createElement('div');
-        flash.style.position = 'absolute';
-        flash.style.top = wallaceElement.style.top;
-        flash.style.left = wallaceElement.style.left;
-        flash.style.width = '120px';
-        flash.style.height = '120px';
-        flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,215,0,0.7) 50%, transparent 100%)';
-        flash.style.borderRadius = '50%';
-        flash.style.transform = 'translate(-50%, -50%)';
-        flash.style.pointerEvents = 'none';
-        flash.style.zIndex = '100';
-        flash.style.animation = 'wallaceFlash 0.8s ease-out forwards';
-        
-        // Adicionar ao container
-        const container = document.querySelector('.wallace-spots');
-        if (container) {
-            container.appendChild(flash);
-        }
-        
-        // Zoom no Wallace encontrado
-        wallaceElement.style.transition = 'all 0.6s ease-out';
-        wallaceElement.style.transform = 'scale(1.5)';
-        wallaceElement.style.filter = 'brightness(1.5) drop-shadow(0 0 20px rgba(255,215,0,0.8))';
-        wallaceElement.style.zIndex = '50';
-        
-        // Remover efeitos após animação
-        setTimeout(() => {
-            if (flash.parentElement) {
-                flash.remove();
-            }
-            wallaceElement.style.transform = 'scale(1)';
-            wallaceElement.style.filter = 'brightness(1) opacity(0.7)';
-        }, 800);
-    }
+    // createWallaceFoundEffect(wallaceElement) { // Removed in favor of AnimationManager.animateWallaceFound
+    //     // Flash de descoberta
+    //     const flash = document.createElement('div');
+    //     flash.style.position = 'absolute';
+    //     flash.style.top = wallaceElement.style.top;
+    //     flash.style.left = wallaceElement.style.left;
+    //     flash.style.width = '120px';
+    //     flash.style.height = '120px';
+    //     flash.style.background = 'radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,215,0,0.7) 50%, transparent 100%)';
+    //     flash.style.borderRadius = '50%';
+    //     flash.style.transform = 'translate(-50%, -50%)';
+    //     flash.style.pointerEvents = 'none';
+    //     flash.style.zIndex = '100';
+    //     flash.style.animation = 'wallaceFlash 0.8s ease-out forwards';
+
+    //     // Adicionar ao container
+    //     const container = document.querySelector('.wallace-spots');
+    //     if (container) {
+    //         container.appendChild(flash);
+    //     }
+
+    //     // Zoom no Wallace encontrado
+    //     wallaceElement.style.transition = 'all 0.6s ease-out';
+    //     wallaceElement.style.transform = 'scale(1.5)';
+    //     wallaceElement.style.filter = 'brightness(1.5) drop-shadow(0 0 20px rgba(255,215,0,0.8))';
+    //     wallaceElement.style.zIndex = '50';
+
+    //     // Remover efeitos após animação
+    //     setTimeout(() => {
+    //         if (flash.parentElement) {
+    //             flash.remove();
+    //         }
+    //         wallaceElement.style.transform = 'scale(1)';
+    //         wallaceElement.style.filter = 'brightness(1) opacity(0.7)';
+    //     }, 800);
+    // }
     
     updateWallaceProgress() {
         const progressElement = document.getElementById('wallace-found');
@@ -188,17 +207,22 @@ class PhaseManager {
         
         // Mostrar diálogo de conclusão
         if (this.game.dialogueManager) {
-            this.game.dialogueManager.startDialogue('fase2_complete');
-            
-            // Aguardar conclusão do diálogo antes de avançar
-            setTimeout(() => {
+            this.game.dialogueManager.showTransitionDialogue('fase2_complete', () => {
+                // this.cleanupPhase2(); // Cleanup now handled by Game.js calling phaseManager.cleanup()
                 this.game.startPhase3();
-            }, 5000);
+            });
         } else {
-            setTimeout(() => {
-                this.game.startPhase3();
-            }, 2000);
+            // Fallback if dialogueManager is not available (should not happen in normal flow)
+            // this.cleanupPhase2(); // Cleanup now handled by Game.js calling phaseManager.cleanup()
+            this.game.startPhase3();
         }
+    }
+
+    cleanupPhase2() {
+        this.currentPhaseData.wallaceElements.forEach(entry => {
+            entry.element.removeEventListener('click', entry.handler);
+        });
+        this.currentPhaseData.wallaceElements = [];
     }
     
     // Fase 3: Ritual da Canábis Sagrada
@@ -211,7 +235,7 @@ class PhaseManager {
             itemSpawner: null,
             sarahPosition: 50,
             activeItems: new Set(),
-            gameActive: true
+            gameActive: false // Start inactive until intro dialogue finishes
         };
         
         this.setupPhase3Controls();
@@ -221,8 +245,10 @@ class PhaseManager {
         // Mostrar diálogo de introdução
         if (this.game.dialogueManager) {
             this.game.dialogueManager.showTransitionDialogue('fase3_intro', () => {
-                this.currentPhaseData.gameActive = true;
+                this.currentPhaseData.gameActive = true; // Activate after dialogue
             });
+        } else {
+            this.currentPhaseData.gameActive = true; // Fallback if no dialogue manager
         }
     }
     
@@ -487,9 +513,8 @@ class PhaseManager {
                 this.game.startPhase4();
             });
         } else {
-            setTimeout(() => {
-                this.game.startPhase4();
-            }, 2000);
+            // Fallback if dialogueManager is not available
+            this.game.startPhase4();
         }
     }
     
@@ -621,9 +646,8 @@ class PhaseManager {
                 this.game.startFinalPhase();
             });
         } else {
-            setTimeout(() => {
-                this.game.startFinalPhase();
-            }, 2000);
+            // Fallback if dialogueManager is not available
+            this.game.startFinalPhase();
         }
     }
     
@@ -633,7 +657,9 @@ class PhaseManager {
             chestOpened: false,
             memoriesStarted: false,
             currentMemory: 0,
-            memoryInterval: null
+            memoryInterval: null,
+            chestPulseAnimationId: null, // To store chest pulse animation ID
+            chestClickHandler: null // To store chest click handler
         };
         
         // Mostrar diálogo de introdução
@@ -653,17 +679,26 @@ class PhaseManager {
         if (bauFechado) {
             // Animação de pulsação
             if (this.game.animationManager) {
-                this.game.animationManager.animateTreasureChestPulse(bauFechado);
+                // Stop previous pulse if any (e.g., phase restart)
+                if (this.currentPhaseData.chestPulseAnimationId) {
+                    this.game.animationManager.stopAnimation(this.currentPhaseData.chestPulseAnimationId);
+                }
+                this.currentPhaseData.chestPulseAnimationId = this.game.animationManager.animateTreasureChestPulse(bauFechado);
             }
             
             // Som de pulsação
             if (this.game.audioManager) {
                 this.game.audioManager.playSFX('assets/sfx/sfx_bau_pulsando.mp3');
             }
-            
-            bauFechado.addEventListener('click', () => {
-                this.openTreasureChest();
-            });
+
+            // Remove previous handler if exists
+            if (this.currentPhaseData.chestClickHandler && bauFechado.getAttribute('listener') === 'true') {
+                 bauFechado.removeEventListener('click', this.currentPhaseData.chestClickHandler);
+            }
+
+            this.currentPhaseData.chestClickHandler = () => this.openTreasureChest();
+            bauFechado.addEventListener('click', this.currentPhaseData.chestClickHandler);
+            bauFechado.setAttribute('listener', 'true'); // Mark that listener is attached
         }
     }
     
@@ -675,6 +710,19 @@ class PhaseManager {
         const bauFechado = document.getElementById('bau-fechado');
         const bauAberto = document.getElementById('bau-aberto');
         const treasureContents = document.getElementById('treasure-contents');
+
+        // Stop pulsing animation
+        if (this.game.animationManager && this.currentPhaseData.chestPulseAnimationId) {
+            this.game.animationManager.stopAnimation(this.currentPhaseData.chestPulseAnimationId);
+            this.currentPhaseData.chestPulseAnimationId = null;
+        }
+
+        // Remove click listener
+        if (this.currentPhaseData.chestClickHandler && bauFechado) {
+            bauFechado.removeEventListener('click', this.currentPhaseData.chestClickHandler);
+            bauFechado.removeAttribute('listener');
+            this.currentPhaseData.chestClickHandler = null;
+        }
         const memoriesSlideshow = document.getElementById('memories-slideshow');
         const heartsAnimation = document.getElementById('hearts-animation');
         
@@ -771,6 +819,7 @@ class PhaseManager {
         // Limpar interval das memórias
         if (this.currentPhaseData.memoryInterval) {
             clearInterval(this.currentPhaseData.memoryInterval);
+            this.currentPhaseData.memoryInterval = null;
         }
         
         setTimeout(() => {
@@ -780,22 +829,54 @@ class PhaseManager {
     
     // Limpeza geral
     cleanup() {
-        // Limpar timers e event listeners de todas as fases
-        if (this.currentPhaseData.itemSpawner) {
-            clearInterval(this.currentPhaseData.itemSpawner);
+        // Fase 2 cleanup
+        if (this.currentPhaseData.wallaceElements && this.currentPhaseData.wallaceElements.length > 0) {
+            this.cleanupPhase2();
         }
-        
+
+        // Fase 3 cleanup
+        if (this.currentPhaseData.itemSpawner || this.phase3KeyHandler || this.phase3MouseHandler) {
+            this.cleanupPhase3(); // Ensure phase 3 specific cleanup is called
+        }
+        // Note: cleanupPhase3 already clears itemSpawner, phase3KeyHandler, phase3MouseHandler. Redundant here.
+        // Simpler:
+        // if (this.game.currentPhase === 'fase3') { // Or check based on currentPhaseData properties
+        //     this.cleanupPhase3();
+        // }
+
+
+        // Fase Final cleanup
         if (this.currentPhaseData.memoryInterval) {
             clearInterval(this.currentPhaseData.memoryInterval);
+            this.currentPhaseData.memoryInterval = null;
         }
-        
-        if (this.phase3KeyHandler) {
-            document.removeEventListener('keydown', this.phase3KeyHandler);
+        if (this.game.animationManager && this.currentPhaseData.chestPulseAnimationId) {
+            this.game.animationManager.stopAnimation(this.currentPhaseData.chestPulseAnimationId);
+            this.currentPhaseData.chestPulseAnimationId = null;
         }
-        
-        if (this.phase3MouseHandler) {
-            document.removeEventListener('mousemove', this.phase3MouseHandler);
+        const bauFechado = document.getElementById('bau-fechado');
+        if (this.currentPhaseData.chestClickHandler && bauFechado) {
+            bauFechado.removeEventListener('click', this.currentPhaseData.chestClickHandler);
+            bauFechado.removeAttribute('listener');
+            this.currentPhaseData.chestClickHandler = null;
         }
+
+        // General cleanup for any phase-specific data if needed
+        this.currentPhaseData = {}; // Reset current phase data
+
+        // The lines below were too generic and are now handled by specific cleanups or this reset.
+        // if (this.currentPhaseData.itemSpawner) { // Handled by cleanupPhase3
+        //     clearInterval(this.currentPhaseData.itemSpawner);
+        // }
+        // if (this.currentPhaseData.memoryInterval) { // Handled by its own block above
+        //     clearInterval(this.currentPhaseData.memoryInterval);
+        // }
+        // if (this.phase3KeyHandler) { // Handled by cleanupPhase3
+        //     document.removeEventListener('keydown', this.phase3KeyHandler);
+        // }
+        // if (this.phase3MouseHandler) { // Handled by cleanupPhase3
+        //     document.removeEventListener('mousemove', this.phase3MouseHandler);
+        // }
     }
 }
 
