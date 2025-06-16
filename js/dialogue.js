@@ -5,6 +5,7 @@ class DialogueManager {
         this.currentLineIndex = 0;
         this.isTyping = false;
         this.typewriterSpeed = 50;
+        this.typewriterIntervalId = null; // Added to store interval ID
         
         this.dialogueElement = document.getElementById('dialogue-text');
         this.nextButton = document.getElementById('btn-proximo');
@@ -262,7 +263,13 @@ class DialogueManager {
             }
             
             // Efeito de máquina de escrever
-            const typeInterval = setInterval(() => {
+            // Clear any existing interval before starting a new one
+            if (this.typewriterIntervalId) {
+                clearInterval(this.typewriterIntervalId);
+                this.typewriterIntervalId = null;
+            }
+
+            this.typewriterIntervalId = setInterval(() => {
                 if (charIndex < text.length) {
                     this.dialogueElement.textContent = text.substring(0, charIndex + 1);
                     charIndex++;
@@ -272,7 +279,8 @@ class DialogueManager {
                         window.game.audioManager.playSFX('assets/sfx/sfx_texto_avancar.mp3', 0.2);
                     }
                 } else {
-                    clearInterval(typeInterval);
+                    clearInterval(this.typewriterIntervalId);
+                    this.typewriterIntervalId = null;
                     
                     // Se não há voz, resolver imediatamente
                     if (!voicePath) {
@@ -355,12 +363,26 @@ class DialogueManager {
     // Método para pausar/retomar diálogo
     pauseDialogue() {
         if (window.game && window.game.audioManager) {
-            window.game.audioManager.stopVoice();
+            window.game.audioManager.stopVoice(); // Stops current voice playback
         }
+        if (this.typewriterIntervalId) {
+            clearInterval(this.typewriterIntervalId); // Stops text typing
+            this.typewriterIntervalId = null;
+        }
+        // Note: this.isTyping is set to false when the typewriterEffect promise resolves or in showLine.
+        // If we pause mid-typing, isTyping might still be true from showLine's perspective.
+        // Forcing it false ensures the "Next" button might appear if needed, or input is unblocked.
         this.isTyping = false;
+        // To allow "Next" button to show if dialogue was paused mid-line,
+        // as the normal typewriter promise resolution that shows it might be bypassed.
+        if (this.nextButton && this.currentDialogue) {
+            this.nextButton.classList.remove('hidden');
+        }
     }
     
     resumeDialogue() {
+        // Resuming should ideally continue from where it left off, but current showLine restarts the line.
+        // For simplicity, we'll stick to restarting the current line's display.
         if (this.currentDialogue && this.currentLineIndex < this.currentDialogue.length) {
             this.showLine(this.currentDialogue[this.currentLineIndex]);
         }
@@ -399,6 +421,18 @@ class DialogueManager {
         };
         
         return JSON.stringify(exportData, null, 2);
+    }
+
+    getVoiceFilePaths() {
+        const voicePaths = new Set();
+        Object.values(this.dialogues).forEach(dialogueSet => {
+            dialogueSet.forEach(line => {
+                if (line.voice) {
+                    voicePaths.add(line.voice);
+                }
+            });
+        });
+        return Array.from(voicePaths);
     }
 }
 

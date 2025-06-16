@@ -21,6 +21,11 @@ class Game {
         this.audioManager = null;
         this.dialogueManager = null;
         this.animationManager = null;
+        // Instantiate DialogueManager early to get voice file paths for preloading
+        // This assumes DialogueManager constructor can run without full game setup if only used for data retrieval.
+        // Or, DialogueManager could have a static method to get dialogue data if it's purely data.
+        // For now, direct instantiation:
+        this.dialogueManager = new DialogueManager();
         
         this.init();
     }
@@ -126,6 +131,7 @@ class Game {
         const audioPaths = [
             // Músicas
             'assets/musica/music_intro_ambiente.mp3',
+            'assets/musica/music_fase1_ambiente.mp3', // Added missing music track
             'assets/musica/music_fase2_ambiente.mp3',
             'assets/musica/music_fase3_gameplay.mp3',
             'assets/musica/music_fase4_quiz.mp3',
@@ -153,14 +159,18 @@ class Game {
             'assets/sfx/sfx_foto_transicao.mp3',
             'assets/sfx/sfx_creditos_iniciar.mp3'
         ];
+
+        // Get voice file paths from DialogueManager
+        const voiceFilePaths = this.dialogueManager.getVoiceFilePaths();
+        const allAudioPaths = audioPaths.concat(voiceFilePaths);
         
-        this.assets.total = imagePaths.length + audioPaths.length;
+        this.assets.total = imagePaths.length + allAudioPaths.length;
         
         // Carregar imagens
         imagePaths.forEach(path => this.loadImage(path));
         
-        // Carregar áudios
-        audioPaths.forEach(path => this.loadAudio(path));
+        // Carregar áudios (including voices)
+        allAudioPaths.forEach(path => this.loadAudio(path));
     }
     
     loadImage(path) {
@@ -208,7 +218,10 @@ class Game {
         
         // Inicializar managers
         this.audioManager = new AudioManager(this.assets.audio);
-        this.dialogueManager = new DialogueManager();
+        // this.dialogueManager was already instantiated
+        if (!this.dialogueManager) { // Should not happen if instantiated before init
+            this.dialogueManager = new DialogueManager();
+        }
         this.animationManager = new AnimationManager();
         this.phaseManager = new PhaseManager(this);
         
@@ -221,6 +234,14 @@ class Game {
     changeScreen(fromScreen, toScreen) {
         const from = this.screens.get(fromScreen);
         const to = this.screens.get(toScreen);
+
+        // Call cleanup for the outgoing phase if it's a game phase
+        if (fromScreen && fromScreen.startsWith('fase')) {
+            if (this.phaseManager) {
+                console.log(`Cleaning up phase: ${fromScreen}`);
+                this.phaseManager.cleanup();
+            }
+        }
         
         if (from) {
             from.classList.remove('active');
@@ -244,7 +265,7 @@ class Game {
             }
             
             this.currentPhase = toScreen;
-        }, 500);
+        }, 1000); // Changed from 500ms to 1000ms to match fadeOut animation in styles.css
     }
     
     startGame() {
@@ -297,18 +318,19 @@ class Game {
     }
     
     handleMouseMove(e) {
-        if (this.currentPhase === 'fase3') {
-            const sarahContainer = document.querySelector('.sarah-container');
-            if (sarahContainer) {
-                const gameArea = document.querySelector('.game-area');
-                const rect = gameArea.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                
-                if (x >= 10 && x <= 90) {
-                    sarahContainer.style.left = `${x}%`;
-                }
-            }
-        }
+        // Fase 3 mouse move logic is now handled by PhaseManager.js
+        // if (this.currentPhase === 'fase3') {
+        //     const sarahContainer = document.querySelector('.sarah-container');
+        //     if (sarahContainer) {
+        //         const gameArea = document.querySelector('.game-area');
+        //         const rect = gameArea.getBoundingClientRect();
+        //         const x = ((e.clientX - rect.left) / rect.width) * 100;
+        //
+        //         if (x >= 10 && x <= 90) {
+        //             sarahContainer.style.left = `${x}%`;
+        //         }
+        //     }
+        // }
     }
     
     toggleMute() {

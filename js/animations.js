@@ -3,6 +3,9 @@ class AnimationManager {
     constructor() {
         this.activeAnimations = new Map();
         this.animationId = 0;
+        this.starParticles = [];
+        this.starParticleTimeouts = [];
+        this.particleContainer = null; // To store the star particle container
         
         this.init();
     }
@@ -13,56 +16,17 @@ class AnimationManager {
     
     setupInitialAnimations() {
         // Configurar animações da tela inicial
-        this.setupSalemBlinking();
+        // this.setupSalemBlinking(); // Removed as it conflicts with CSS animations
         this.setupFloatingAnimations();
         this.setupParticleEffects();
     }
     
-    setupSalemBlinking() {
-        const salemFloating = document.getElementById('salem-floating');
-        if (!salemFloating) return;
-        
-        let isBlinking = false;
-        
-        const blink = () => {
-            if (isBlinking) return;
-            
-            isBlinking = true;
-            
-            // Trocar para sprite piscando
-            salemFloating.src = 'assets/imagens/tela_inicio/tela_inicio_salem_piscando_1.png';
-            
-            setTimeout(() => {
-                salemFloating.src = 'assets/imagens/tela_inicio/tela_inicio_salem_piscando_2.png';
-                
-                // Tocar som de piscar
-                if (window.game && window.game.audioManager) {
-                    window.game.audioManager.playSFX('assets/sfx/sfx_salem_piscar.mp3', 0.5);
-                }
-                
-                setTimeout(() => {
-                    salemFloating.src = 'assets/imagens/tela_inicio/tela_inicio_salem_flutuando.png';
-                    isBlinking = false;
-                }, 150);
-            }, 100);
-        };
-        
-        // Piscar a cada 3-7 segundos aleatoriamente
-        const scheduleNextBlink = () => {
-            const delay = 3000 + Math.random() * 4000;
-            setTimeout(() => {
-                blink();
-                scheduleNextBlink();
-            }, delay);
-        };
-        
-        scheduleNextBlink();
-    }
+    // setupSalemBlinking() removed.
     
     setupFloatingAnimations() {
         // Animações de flutuação já estão no CSS, mas podemos adicionar variações
         this.addFloatingVariation('sarah-floating');
-        this.addFloatingVariation('salem-floating');
+        this.addFloatingVariation('salem-container'); // Corrected ID from 'salem-floating'
     }
     
     addFloatingVariation(elementId) {
@@ -83,12 +47,15 @@ class AnimationManager {
     }
     
     createStarParticles() {
-        const container = document.getElementById('game-container');
-        if (!container) return;
+        const gameContainer = document.getElementById('game-container');
+        if (!gameContainer) return;
+
+        // Stop any existing star particles before creating new ones (e.g., if re-initializing)
+        this.stopStarParticles();
         
-        const particleContainer = document.createElement('div');
-        particleContainer.className = 'particle-container';
-        particleContainer.style.cssText = `
+        this.particleContainer = document.createElement('div');
+        this.particleContainer.className = 'particle-container';
+        this.particleContainer.style.cssText = `
             position: absolute;
             top: 0;
             left: 0;
@@ -98,17 +65,22 @@ class AnimationManager {
             z-index: 5;
         `;
         
-        container.appendChild(particleContainer);
+        gameContainer.appendChild(this.particleContainer);
         
         // Criar partículas de estrela
         for (let i = 0; i < 20; i++) {
-            this.createStarParticle(particleContainer);
+            this.createStarParticle(this.particleContainer);
         }
     }
     
     createStarParticle(container) {
         const star = document.createElement('div');
         star.className = 'star-particle';
+        // Assign unique ID for tracking timeouts
+        const starId = `star-${this.animationId++}`;
+        star.dataset.id = starId;
+        this.starParticles.push(star);
+
         star.style.cssText = `
             position: absolute;
             width: 4px;
@@ -126,32 +98,54 @@ class AnimationManager {
         container.appendChild(star);
         
         // Animação de cintilação
-        this.animateStarTwinkle(star);
+        this.animateStarTwinkle(star, starId);
     }
     
-    animateStarTwinkle(star) {
+    animateStarTwinkle(star, starId) {
         const twinkle = () => {
+            if (!this.starParticles.includes(star)) return; // Stop if star was removed
+
             star.style.opacity = '0';
             
-            setTimeout(() => {
+            const timeout1 = setTimeout(() => {
                 star.style.opacity = '1';
                 star.style.transform = `scale(${0.5 + Math.random() * 1})`;
                 
-                setTimeout(() => {
+                const timeout2 = setTimeout(() => {
                     star.style.opacity = '0';
                     
-                    // Reposicionar aleatoriamente
-                    setTimeout(() => {
-                        star.style.left = `${Math.random() * 100}%`;
-                        star.style.top = `${Math.random() * 100}%`;
-                        twinkle();
+                    const timeout3 = setTimeout(() => {
+                        if (this.starParticles.includes(star)) { // Check again before restarting
+                            star.style.left = `${Math.random() * 100}%`;
+                            star.style.top = `${Math.random() * 100}%`;
+                            twinkle();
+                        }
                     }, 1000 + Math.random() * 2000);
+                    this.starParticleTimeouts.push({ id: starId, timeoutId: timeout3, type: 'reposition' });
                 }, 1000 + Math.random() * 2000);
+                this.starParticleTimeouts.push({ id: starId, timeoutId: timeout2, type: 'fadeOut' });
             }, 500 + Math.random() * 1000);
+            this.starParticleTimeouts.push({ id: starId, timeoutId: timeout1, type: 'fadeIn' });
         };
         
         // Iniciar com delay aleatório
-        setTimeout(twinkle, Math.random() * 3000);
+        const initialTimeout = setTimeout(twinkle, Math.random() * 3000);
+        this.starParticleTimeouts.push({ id: starId, timeoutId: initialTimeout, type: 'initial' });
+    }
+
+    stopStarParticles() {
+        this.starParticleTimeouts.forEach(timeoutEntry => clearTimeout(timeoutEntry.timeoutId));
+        this.starParticleTimeouts = [];
+        this.starParticles.forEach(star => {
+            if (star.parentElement) {
+                star.parentElement.removeChild(star);
+            }
+        });
+        this.starParticles = [];
+        if (this.particleContainer && this.particleContainer.parentElement) {
+            this.particleContainer.parentElement.removeChild(this.particleContainer);
+            this.particleContainer = null;
+        }
     }
     
     startInitialAnimations() {
@@ -396,8 +390,9 @@ class AnimationManager {
     
     // Animações para Fase Final
     animateTreasureChestPulse(chest) {
-        if (!chest) return;
+        if (!chest) return null;
         
+        const animationId = `chestPulse-${this.animationId++}`;
         const pulseAnimation = chest.animate([
             { transform: 'scale(1)', filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8))' },
             { transform: 'scale(1.05)', filter: 'drop-shadow(0 0 30px rgba(255, 215, 0, 1))' },
@@ -408,7 +403,8 @@ class AnimationManager {
             easing: 'ease-in-out'
         });
         
-        return pulseAnimation;
+        this.activeAnimations.set(animationId, pulseAnimation);
+        return animationId; // Return ID instead of Animation object
     }
     
     animateChestOpening(closedChest, openChest) {
@@ -484,7 +480,8 @@ class AnimationManager {
         });
     }
     
-    // Transições entre telas
+    // Transições entre telas (Commented out/Removed to avoid redundancy with Game.js changeScreen)
+    /*
     createScreenTransition(fromScreen, toScreen, type = 'fade') {
         switch (type) {
             case 'fade':
@@ -579,6 +576,7 @@ class AnimationManager {
             };
         }
     }
+    */
     
     // Limpeza de animações
     stopAnimation(animationId) {
