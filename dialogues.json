@@ -1,0 +1,158 @@
+[
+  {
+    "id": "01_fase1_intro_salem.mp3",
+    "text": "Sarah... acorde. Você precisa resgatar Wallace.",
+    "voice_file_name": "01_fase1_intro_salem.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "02_fase1_sarah_confusa.mp3",
+    "text": "Salem? O que está acontecendo? Onde estou?",
+    "voice_file_name": "02_fase1_sarah_confusa.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "03_fase1_salem_explicacao.mp3",
+    "text": "Você está no plano astral, querida. Wallace foi capturado pelas forças do esquecimento.",
+    "voice_file_name": "03_fase1_salem_explicacao.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "04_fase1_salem_urgencia.mp3",
+    "text": "Ele se tornou o 'Deus Esquecido' e precisa ser resgatado antes que desapareça para sempre.",
+    "voice_file_name": "04_fase1_salem_urgencia.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "05_fase1_sarah_determinada.mp3",
+    "text": "Não! Eu não posso perdê-lo! O que preciso fazer?",
+    "voice_file_name": "05_fase1_sarah_determinada.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "06_fase1_salem_missao.mp3",
+    "text": "Você deve passar por quatro provações cósmicas. Primeiro, encontre todas as manifestações de Wallace escondidas no reino Ghibli.",
+    "voice_file_name": "06_fase1_salem_missao.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "07_fase1_salem_sabedoria.mp3",
+    "text": "Os outros gatos místicos te guiarão. Lembre-se: o amor verdadeiro supera qualquer esquecimento.",
+    "voice_file_name": "07_fase1_salem_sabedoria.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "08_fase1_sarah_promessa.mp3",
+    "text": "Eu vou salvá-lo, Salem. Nosso amor é mais forte que qualquer força cósmica!",
+    "voice_file_name": "08_fase1_sarah_promessa.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "09_fase2_intro_oraculo.mp3",
+    "text": "Bem-vinda ao Reino Ghibli, Sarah. Aqui Wallace se escondeu em cinco formas diferentes.",
+    "voice_file_name": "09_fase2_intro_oraculo.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "10_fase2_instrucoes.mp3",
+    "text": "Encontre todas as manifestações dele para liberar sua essência e prosseguir para o próximo desafio.",
+    "voice_file_name": "10_fase2_instrucoes.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "11_fase2_parabens.mp3",
+    "text": "Incrível, Sarah! Você encontrou todas as manifestações de Wallace!",
+    "voice_file_name": "11_fase2_parabens.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "12_fase2_proximo_desafio.mp3",
+    "text": "Sinto sua energia se fortalecendo. Agora você deve passar pelo Ritual da Canábis Sagrada.",
+    "voice_file_name": "12_fase2_proximo_desafio.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "13_fase3_intro_vortice.mp3",
+    "text": "Agora você entra no Vórtice Cósmico, onde deve coletar apenas as energias positivas.",
+    "voice_file_name": "13_fase3_intro_vortice.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "14_fase3_instrucoes.mp3",
+    "text": "Colete folhas douradas, cogumelos sagrados, comida e bebidas. Evite seringas e cigarros - eles drenam sua energia vital.",
+    "voice_file_name": "14_fase3_instrucoes.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "15_fase3_controles.mp3",
+    "text": "Use as setas do teclado ou mova o mouse para controlar Sarah. Seja rápida e sábia!",
+    "voice_file_name": "15_fase3_controles.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "16_fase3_sucesso.mp3",
+    "text": "Fantástico! Sua energia cósmica está purificada e amplificada!",
+    "voice_file_name": "16_fase3_sucesso.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "17_fase3_quiz_anuncio.mp3",
+    "text": "Agora você está pronta para o Quiz Cósmico do Amor - o teste final antes do resgate.",
+    "voice_file_name": "17_fase3_quiz_anuncio.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "18_fase4_intro_teste.mp3",
+    "text": "Este é o teste definitivo, Sarah. Responda às perguntas sobre seu amor por Wallace.",
+    "voice_file_name": "18_fase4_intro_teste.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "19_fase4_importancia.mp3",
+    "text": "Apenas o conhecimento verdadeiro do coração pode quebrar as correntes do esquecimento.",
+    "voice_file_name": "19_fase4_importancia.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "20_fase4_vitoria.mp3",
+    "text": "Seu amor é verdadeiro e profundo, Sarah! As correntes do esquecimento se quebram!",
+    "voice_file_name": "20_fase4_vitoria.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "21_fase4_altar_liberado.mp3",
+    "text": "Agora você pode acessar o Altar Sagrado onde Wallace aguarda seu resgate final.",
+    "voice_file_name": "21_fase4_altar_liberado.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "22_final_wallace_voz.mp3",
+    "text": "Sarah... você chegou até aqui. O Baú dos Prazeres Cósmicos contém a chave para meu retorno.",
+    "voice_file_name": "22_final_wallace_voz.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "23_final_wallace_pedido.mp3",
+    "text": "Abra o baú e liberte-me do esquecimento. Nosso amor será eterno e transcendental.",
+    "voice_file_name": "23_final_wallace_pedido.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "24_final_wallace_gratidao.mp3",
+    "text": "Meu amor... você me salvou! Agora somos eternos, unidos além do tempo e espaço.",
+    "voice_file_name": "24_final_wallace_gratidao.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "25_final_memorias.mp3",
+    "text": "Estas memórias são nossa prova de que o amor verdadeiro supera qualquer obstáculo cósmico.",
+    "voice_file_name": "25_final_memorias.mp3",
+    "path": "assets/vozes/"
+  },
+  {
+    "id": "26_final_promessa_eterna.mp3",
+    "text": "Para sempre juntos, meu Deus Esquecido que nunca mais será esquecido.",
+    "voice_file_name": "26_final_promessa_eterna.mp3",
+    "path": "assets/vozes/"
+  }
+]

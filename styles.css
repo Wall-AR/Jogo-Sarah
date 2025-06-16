@@ -75,7 +75,7 @@ body {
 
 .title-layer {
     position: absolute;
-    top: 10%;
+    top: 15%; /* Changed from 10% */
     left: 50%;
     transform: translateX(-50%);
     z-index: 3;

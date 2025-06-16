@@ -207,12 +207,15 @@ class PhaseManager {
         
         // Mostrar diálogo de conclusão
         if (this.game.dialogueManager) {
+            console.log("PhaseManager: completePhase2 - Calling showTransitionDialogue for 'fase2_complete'.");
             this.game.dialogueManager.showTransitionDialogue('fase2_complete', () => {
+                console.log("PhaseManager: fase2_complete dialogue callback EXECUTING.");
                 // this.cleanupPhase2(); // Cleanup now handled by Game.js calling phaseManager.cleanup()
                 this.game.startPhase3();
             });
         } else {
             // Fallback if dialogueManager is not available (should not happen in normal flow)
+            console.warn("PhaseManager: DialogueManager not available in completePhase2. Attempting direct transition.");
             // this.cleanupPhase2(); // Cleanup now handled by Game.js calling phaseManager.cleanup()
             this.game.startPhase3();
         }
