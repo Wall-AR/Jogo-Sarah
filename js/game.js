@@ -269,17 +269,24 @@ class Game {
     }
     
     startGame() {
+        // Start intro music on first user interaction
+        if (this.audioManager && !this.audioManager.currentMusic) { // Check if music isn't already playing
+            this.audioManager.startIntroMusic();
+        }
+
         this.audioManager.playSFX('assets/sfx/sfx_botao_clique.mp3');
         this.audioManager.playSFX('assets/sfx/sfx_transicao_cena.mp3');
         
         setTimeout(() => {
             this.changeScreen('tela-inicial', 'fase1');
-            this.audioManager.startPhase1Music();
-            this.startPhase1();
+            // this.audioManager.startPhase1Music(); // This is called by changeScreen -> startPhase1 now effectively
+            this.startPhase1(); // This will lead to phase1 music if appropriate
         }, 1000);
     }
     
     startPhase1() {
+        // Music for phase 1 is started here, after screen transition and before dialogue
+        this.audioManager.startPhase1Music();
         this.dialogueManager.startDialogue('fase1');
     }
     
