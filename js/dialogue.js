@@ -254,15 +254,26 @@ class DialogueManager {
     }
     
     typewriterEffect(text, voicePath) {
-        return new Promise((resolve) => {
+        return new Promise((resolveMain) => {
             let charIndex = 0;
-            
-            // Iniciar reprodução de voz se disponível
+            let voicePlaybackFinished = !voicePath; // True if no voice, otherwise waits
+            let typingFinished = false;
+
+            const tryResolveMain = () => {
+                if (voicePlaybackFinished && typingFinished) {
+                    resolveMain();
+                }
+            };
+
+            // Voice playback part
             if (voicePath && window.game && window.game.audioManager) {
-                window.game.audioManager.playVoice(voicePath, resolve);
+                window.game.audioManager.playVoice(voicePath, () => { // playVoice's onEnd callback
+                    voicePlaybackFinished = true;
+                    tryResolveMain();
+                });
             }
-            
-            // Efeito de máquina de escrever
+
+            // Typing part
             // Clear any existing interval before starting a new one
             if (this.typewriterIntervalId) {
                 clearInterval(this.typewriterIntervalId);
@@ -273,19 +284,14 @@ class DialogueManager {
                 if (charIndex < text.length) {
                     this.dialogueElement.textContent = text.substring(0, charIndex + 1);
                     charIndex++;
-                    
-                    // Tocar som de digitação ocasionalmente
                     if (charIndex % 3 === 0 && window.game && window.game.audioManager) {
                         window.game.audioManager.playSFX('assets/sfx/sfx_texto_avancar.mp3', 0.2);
                     }
                 } else {
                     clearInterval(this.typewriterIntervalId);
                     this.typewriterIntervalId = null;
-                    
-                    // Se não há voz, resolver imediatamente
-                    if (!voicePath) {
-                        resolve();
-                    }
+                    typingFinished = true;
+                    tryResolveMain();
                 }
             }, this.typewriterSpeed);
         });

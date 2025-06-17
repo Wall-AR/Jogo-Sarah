@@ -33,8 +33,8 @@ class AudioManager {
         // Configurar eventos de erro
         this.setupErrorHandling();
         
-        // Iniciar música de intro automaticamente
-        this.startIntroMusic();
+        // Iniciar música de intro automaticamente - REMOVED, will be started by Game.startGame()
+        // this.startIntroMusic();
     }
     
     setupErrorHandling() {
